@@ -12,7 +12,7 @@ export default function App() {
 						Home
 					</Link>
 					<Link to="/profile" className="text-blue-500">
-						View Profile
+						View Profiles
 					</Link>
 				</nav>
 
@@ -30,6 +30,14 @@ export default function App() {
 						element={
 							<ErrorBoundary>
 								<Profile />
+							</ErrorBoundary>
+						}
+					/>
+					<Route
+						path="/edit-profile/:id"
+						element={
+							<ErrorBoundary>
+								<ProfileForm />
 							</ErrorBoundary>
 						}
 					/>

@@ -1,7 +1,8 @@
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
 export default function Profile() {
-	const profiles = useSelector((state) => state.profile.profiles); // ✅ Get multiple profiles
+	const profiles = useSelector((state) => state.profile.profiles);
 
 	if (!profiles.length) {
 		return (
@@ -13,9 +14,9 @@ export default function Profile() {
 		<div className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-lg">
 			<h2 className="text-2xl font-bold mb-4">Business Profiles</h2>
 
-			{profiles.map((profile, index) => (
-				<div key={index} className="mb-6 p-4 border rounded-lg">
-					{/* Display Business Logo */}
+			{profiles.map((profile) => (
+				<div key={profile.id} className="mb-6 p-4 border rounded-lg">
+					{/* ✅ Business Logo Section Restored */}
 					<div className="flex justify-center mb-4">
 						{profile.logo ? (
 							<img
@@ -40,6 +41,11 @@ export default function Profile() {
 					<p>
 						<strong>Description:</strong> {profile.description}
 					</p>
+
+					{/* ✅ Edit Profile Button */}
+					<Link to={`/edit-profile/${profile.id}`} className="text-blue-500">
+						Edit
+					</Link>
 				</div>
 			))}
 		</div>
