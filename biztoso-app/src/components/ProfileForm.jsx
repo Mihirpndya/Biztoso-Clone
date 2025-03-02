@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,13 +12,10 @@ const validationSchema = Yup.object().shape({
 	name: Yup.string().required("Business name is required"),
 	location: Yup.string().required("Location is required"),
 	description: Yup.string().required("Description is required"),
-	logo: Yup.mixed()
-		.test("fileSize", "File must be less than 1MB", (value) =>
-			value ? value.size <= 1000000 : true
-		)
-		.test("fileType", "Only PNG files are allowed", (value) =>
-			value ? value.type === "image/png" : true
-		),
+	logo: Yup.mixed().test("fileSize", "File must be less than 1MB", (value) => {
+		if (!value || typeof value === "string") return true; // ✅ Allows existing logos
+		return value.size <= 1000000;
+	}),
 });
 
 export default function ProfileForm() {
@@ -26,6 +23,13 @@ export default function ProfileForm() {
 	const navigate = useNavigate();
 	const { id } = useParams();
 	const profiles = useSelector((state) => state.profile.profiles);
+
+	const existingProfile = profiles.length > 0 ? profiles[0] : null;
+	useEffect(() => {
+		if (existingProfile && !id) {
+			navigate("/profile");
+		}
+	}, [existingProfile, navigate, id]);
 
 	const editingProfile = profiles.find((p) => p.id === Number(id)) || null;
 
@@ -73,6 +77,8 @@ export default function ProfileForm() {
 		setFieldValue("logo", file);
 	};
 
+	if (existingProfile && !id) return null;
+
 	return (
 		<div className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-lg relative">
 			{/* ✅ Cross (X) Button on the Top-Right (Only in Edit Mode) */}
@@ -98,6 +104,10 @@ export default function ProfileForm() {
 				}}
 				validationSchema={validationSchema}
 				onSubmit={(values) => {
+					if (uploading) {
+						alert("Please wait for the image to finish uploading.");
+						return;
+					}
 					if (editingProfile) {
 						dispatch(
 							editProfile({ ...values, id: editingProfile.id, logo: preview })
@@ -167,8 +177,6 @@ export default function ProfileForm() {
 								/>
 							)}
 						</div>
-
-						{/* ✅ Save/Update Button Centered */}
 						<div className="flex justify-center">
 							<button
 								type="submit"

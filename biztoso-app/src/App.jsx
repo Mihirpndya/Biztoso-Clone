@@ -12,7 +12,7 @@ export default function App() {
 						Home
 					</Link>
 					<Link to="/profile" className="text-blue-500">
-						View Profiles
+						Profile
 					</Link>
 				</nav>
 
