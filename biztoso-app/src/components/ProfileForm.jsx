@@ -7,13 +7,14 @@ import supabase from "../utils/supabase.js";
 import { useNavigate, useParams } from "react-router-dom";
 import { X } from "lucide-react"; // ✅ Import Cross Icon
 
-// ✅ Validation Schema
+// ✅ Validation Schema (Logo only required for new profile)
 const validationSchema = Yup.object().shape({
 	name: Yup.string().required("Business name is required"),
 	location: Yup.string().required("Location is required"),
 	description: Yup.string().required("Description is required"),
-	logo: Yup.mixed().test("fileSize", "File must be less than 1MB", (value) => {
-		if (!value || typeof value === "string") return true; // ✅ Allows existing logos
+	logo: Yup.mixed().test("fileSize", "File must be less than 1MB", (value, context) => {
+		// ✅ Skip validation if logo already exists
+		if (!value || typeof value === "string" || context?.parent?.logo) return true;
 		return value.size <= 1000000;
 	}),
 });
@@ -25,6 +26,7 @@ export default function ProfileForm() {
 	const profiles = useSelector((state) => state.profile.profiles);
 
 	const existingProfile = profiles.length > 0 ? profiles[0] : null;
+
 	useEffect(() => {
 		if (existingProfile && !id) {
 			navigate("/profile");
@@ -74,7 +76,7 @@ export default function ProfileForm() {
 		}
 
 		setPreview(publicUrl);
-		setFieldValue("logo", file);
+		setFieldValue("logo", publicUrl); // ✅ Store URL in form values
 	};
 
 	if (existingProfile && !id) return null;
@@ -100,7 +102,7 @@ export default function ProfileForm() {
 					name: editingProfile?.name || "",
 					location: editingProfile?.location || "",
 					description: editingProfile?.description || "",
-					logo: editingProfile?.logo || null,
+					logo: editingProfile?.logo || "",
 				}}
 				validationSchema={validationSchema}
 				onSubmit={(values) => {
@@ -109,11 +111,9 @@ export default function ProfileForm() {
 						return;
 					}
 					if (editingProfile) {
-						dispatch(
-							editProfile({ ...values, id: editingProfile.id, logo: preview })
-						);
+						dispatch(editProfile({ ...values, id: editingProfile.id }));
 					} else {
-						dispatch(addProfile({ ...values, logo: preview }));
+						dispatch(addProfile(values));
 					}
 					navigate("/profile");
 				}}
@@ -169,6 +169,7 @@ export default function ProfileForm() {
 								component="p"
 								className="text-red-500 text-sm"
 							/>
+							{/* ✅ Show Preview */}
 							{preview && (
 								<img
 									src={preview}
@@ -177,6 +178,7 @@ export default function ProfileForm() {
 								/>
 							)}
 						</div>
+
 						<div className="flex justify-center">
 							<button
 								type="submit"
