@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, Link } from "react-router-dom";
-import  supabase  from "./utils/supabase";
+import supabase from "./utils/supabase";
+import { useSelector } from "react-redux";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import ProfileForm from "./components/ProfileForm";
 import Chat from "./pages/Chat";
-import { useSelector } from "react-redux";
+import Leads from "./pages/Leads";
 
 export default function App() {
 	const [session, setSession] = useState(null);
 	const [loading, setLoading] = useState(true);
-	const profile = useSelector((state) => state.profile.profiles[0]); // Get the first profile
+
+	// Get profile from Redux state
+	const profile = useSelector((state) => state.profile.profiles[0]); // First profile
 
 	useEffect(() => {
 		const checkAuth = async () => {
@@ -46,6 +49,7 @@ export default function App() {
 								Profile
 							</Link>
 							<Link to="/chat" className="text-blue-500">Messages</Link>
+							<Link to="/leads" className="text-blue-500">Leads</Link>
 							<button
 								onClick={async () => {
 									await supabase.auth.signOut();
@@ -67,6 +71,7 @@ export default function App() {
 					<Route path="/create-profile" element={session ? (profile ? <Navigate to="/profile" /> : <ProfileForm />) : <Navigate to="/" />} />
 					<Route path="/edit-profile/:id" element={session ? (profile ? <ProfileForm /> : <Navigate to="/create-profile" />) : <Navigate to="/" />} />
 					<Route path="/chat" element={session ? <Chat /> : <Navigate to="/" />} />
+					<Route path="/leads" element={session ? <Leads /> : <Navigate to="/" />} />
 				</Routes>
 			</div>
 		</Router>
