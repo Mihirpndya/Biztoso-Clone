@@ -1,9 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 // Async thunk for fetching leads
+const API_URL = import.meta.env.VITE_LEADS_URL; // Use VITE_ prefix
+
 export const fetchLeads = createAsyncThunk("leads/fetchLeads", async () => {
 	const response = await fetch(
-		"https://67c42383c4649b9551b2bd7e.mockapi.io/api/v1/leadsGenerator"
+		`${API_URL}`
 	);
 	if (!response.ok) throw new Error("Failed to fetch leads");
 	return await response.json();
